@@ -10,19 +10,21 @@ import 'models/health_models.dart';
 /// achieved by seeding `Random` from the day-of-year rather than wall-clock
 /// entropy, so screenshots/tests are stable across runs.
 class FakeHealthProvider implements HealthProvider {
-  FakeHealthProvider({this.seedOffset = 0});
+  FakeHealthProvider({this.seedOffset = 0, String providerId = 'fake'}) : _providerId = providerId;
 
   /// Shifts the deterministic seed — lets two fake providers (e.g. a
-  /// "family member A" vs "family member B" demo) produce different but
-  /// still-reproducible series.
+  /// "family member A" vs "family member B" demo, or a fake standing in for
+  /// Garmin vs Health Connect) produce different but still-reproducible
+  /// series.
   final int seedOffset;
+  final String _providerId;
 
   bool _connected = true;
 
   int _seedFor(DateTime date) => date.year * 1000 + date.dayOfYearApprox + seedOffset;
 
   @override
-  String get providerId => 'fake';
+  String get providerId => _providerId;
 
   @override
   Future<bool> isConnected() async => _connected;

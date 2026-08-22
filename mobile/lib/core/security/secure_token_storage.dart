@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// Thin wrapper over `flutter_secure_storage` (Keychain on iOS, EncryptedSharedPreferences/
@@ -38,3 +39,5 @@ class SecureTokenStorage {
 
   Future<void> clearAll() => _storage.deleteAll();
 }
+
+final secureTokenStorageProvider = Provider<SecureTokenStorage>((ref) => SecureTokenStorage());

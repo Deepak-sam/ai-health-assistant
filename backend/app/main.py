@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from app.ai.gemini_client import GeminiError
 from app.api.alerts import router as alerts_router
 from app.api.chat import router as chat_router
+from app.api.garmin import router as garmin_router
 from app.api.nutrition import router as nutrition_router
 from app.config.settings import get_settings
 
@@ -29,6 +30,7 @@ app.add_middleware(
 app.include_router(chat_router, prefix="/api/v1")
 app.include_router(nutrition_router, prefix="/api/v1")
 app.include_router(alerts_router, prefix="/api/v1")
+app.include_router(garmin_router, prefix="/api/v1")
 
 
 @app.exception_handler(GeminiError)

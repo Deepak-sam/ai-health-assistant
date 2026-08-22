@@ -37,6 +37,11 @@ dependencies:
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.1
 
+  # Local notifications for on-device alert firing (ARCHITECTURE.md §10:
+  # AlertRuleEvaluator "triggers a local notification" on a rule breach —
+  # not part of the suggested list but required to implement that behavior).
+  flutter_local_notifications: ^17.2.2
+
   # Health Connect / HealthKit (ARCHITECTURE.md §7)
   health: ^10.2.0
 
@@ -65,5 +70,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/
+  # No bundled assets yet — add an `assets:` section here once there are
+  # real files to list (an empty directory entry can trip up some Flutter
+  # tooling versions).

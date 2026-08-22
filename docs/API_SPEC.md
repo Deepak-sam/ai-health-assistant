@@ -115,6 +115,27 @@ The client shows `confirmation_text` to the user before persisting `rule`
 locally into `alert_rules`. No further backend calls happen when the rule
 fires — that's evaluated entirely on-device by `AlertRuleEvaluator`.
 
+## `GET /garmin/oauth/authorize-url`
+Mints a fresh Garmin authorization URL for the authenticated caller, with a
+server-generated PKCE challenge + `state` stored server-side (see
+`backend/app/garmin/session_store.py` — an in-memory, Phase-1-scoped store;
+see that module's docstring for the tradeoff). Response:
+```json
+{"authorize_url": "https://connect.garmin.com/oauth2Confirm?..."}
+```
+
+## `GET /garmin/oauth/callback`
+**Unauthenticated** — Garmin's own redirect target, called from the user's
+webview, not the app directly. Exchanges `code`/`state` for tokens
+server-side, then 307-redirects the webview to the mobile app's custom URL
+scheme: `{scheme}://oauth?status=connected&session_ref=...` on success, or
+`{scheme}://oauth?status=error&error=...` on failure. The app never sees a
+Garmin token, only the opaque `session_ref`.
+
+Note: there is currently no endpoint that syncs actual Garmin health metrics
+to the device — only the OAuth *connection* is functional in Phase 1. See
+`docs/ARCHITECTURE.md` §12 and `mobile/README.md` "Garmin OAuth notes".
+
 ## Error format
 ```json
 {"error": {"code": "not_allowlisted", "message": "This account is not authorized for this family instance."}}

@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     garmin_client_id: str = ""
     garmin_client_secret: str = ""
     garmin_redirect_uri: str = ""
+    # Custom URL scheme the mobile app registers to catch the end of the
+    # OAuth redirect chain (must match the app's GARMIN_REDIRECT_SCHEME
+    # --dart-define — see mobile/README.md "Garmin OAuth notes").
+    garmin_app_redirect_scheme: str = "familyhealth"
 
     # App
     backend_url: str = "http://localhost:8080"

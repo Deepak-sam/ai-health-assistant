@@ -2,9 +2,12 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart'; // ensures native sqlite3 lib is bundled
+// `sqlite3_flutter_libs` isn't imported here — being listed as a pubspec
+// dependency is sufficient for Flutter's plugin system to bundle the native
+// sqlite3 binary on Android/iOS; no Dart-level API from it is needed.
 
 import 'daos/ai_insights_dao.dart';
 import 'daos/alert_rules_dao.dart';
@@ -89,3 +92,10 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 }
+
+/// Single shared database instance for the app's lifetime.
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase();
+  ref.onDispose(db.close);
+  return db;
+});
