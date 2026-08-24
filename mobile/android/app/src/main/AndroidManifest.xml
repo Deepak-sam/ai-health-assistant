@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hand-authored (no Flutter SDK/`flutter create .` available in this
+     environment) — see mobile/README.md and mobile/android/README_ICONS.md.
+     `namespace` (not a manifest `package` attribute — deprecated for
+     resource resolution under AGP 8+) is declared in app/build.gradle. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- All backend API calls (dio) and Firebase Auth/Messaging need this. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- flutter_local_notifications (on-device alert-rule breach
+         notifications, ARCHITECTURE.md §10) and firebase_messaging (push)
+         both post notifications; Android 13+ (API 33+) requires this as a
+         runtime-requested permission, and targetSdk here is 34. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- ================================================================
+         Health Connect (ARCHITECTURE.md §7; mobile/README.md "Health
+         Connect permission notes"). READ-ONLY scopes only, matching that
+         list exactly — no android.permission.health.WRITE_* permission is
+         requested anywhere in this manifest, by design (§8 "minimum
+         permissions required").
+
+         README/ARCHITECTURE.md list the scopes as: STEPS, HEART_RATE,
+         RESTING_HEART_RATE, SLEEP_SESSION, ACTIVE_CALORIES_BURNED,
+         TOTAL_CALORIES_BURNED, WEIGHT, DISTANCE, WORKOUT/EXERCISE. Health
+         Connect's actual permission constant for the last one is
+         READ_EXERCISE (there is no READ_WORKOUT permission) — mapped
+         1:1 otherwise.
+         ================================================================ -->
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_RESTING_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+    <uses-permission android:name="android.permission.health.READ_DISTANCE" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
+
+    <!-- Android 11+ (API 30+) package-visibility: lets the app detect
+         whether Health Connect is installed on-device and route permission
+         requests / data reads to it. This package name
+         (com.google.android.apps.healthdata) is Health Connect's stable,
+         well-documented package id. -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
+
+    <application
+        android:label="Family Health"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:networkSecurityConfig="@xml/network_security_config">
+        <!-- @mipmap/ic_launcher: the placeholder Flutter's own
+             `flutter create` template ships by default. No
+             mipmap-*/ic_launcher.* resources exist yet in this
+             hand-authored tree — see ../../README_ICONS.md. This WILL fail
+             resource resolution ("resource mipmap/ic_launcher not found")
+             until real launcher icons are added. -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Standard Flutter v2 embedding splash-theme-to-UI-theme swap,
+                 wired up by FlutterActivity itself. -->
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Garmin OAuth redirect (ARCHITECTURE.md §6; mobile/README.md
+                 "Garmin OAuth notes"): the backend finishes the PKCE token
+                 exchange server-side, then redirects the in-app webview to
+                 this custom scheme with a short-lived session reference.
+                 Scheme value MUST stay in sync with
+                 AppConfig.garminRedirectScheme's default
+                 (lib/core/config/app_config.dart: "familyhealth") — if a
+                 build ever overrides GARMIN_REDIRECT_SCHEME via
+                 --dart-define to something else, this data element needs
+                 updating to match, or the OAuth redirect will silently fail
+                 to reopen the app. This is a custom (non-http/https) URL
+                 scheme, so android:autoVerify (App Links / Digital Asset
+                 Links verification) does not apply here. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="familyhealth" />
+            </intent-filter>
+
+            <!-- Health Connect privacy-policy "rationale" link target,
+                 Android 13 (API 33) and below.
+
+                 CONFIDENCE NOTE: this intent-filter shape is reconstructed
+                 from the Android Health Connect developer guide's
+                 documented convention (the action name
+                 "androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" has
+                 been stable across Health Connect's rollout), NOT verified
+                 against the `health` ^10.2.0 package's own pub.dev/GitHub
+                 setup instructions — this environment has no network
+                 access to fetch that page. Of everything in this manifest,
+                 this is the single most likely thing to need adjusting
+                 once someone can check
+                 https://pub.dev/packages/health#android-setup directly. -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+        </activity>
+
+        <!-- Health Connect privacy-policy rationale link target, Android 14
+             (API 34) and above — same confidence note as the intent-filter
+             above; Android 14 changed this from an activity intent-filter
+             to an activity-alias with this specific permission/action/
+             category combination per the Health Connect developer guide. -->
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+
+        <!-- image_picker camera capture (ARCHITECTURE.md §8 — the captured
+             photo is only ever held in memory after this point, never
+             persisted to app storage long-term). The system camera app
+             needs a content:// URI it's allowed to write to, which is what
+             this FileProvider grants.
+
+             Note: recent image_picker versions bundle their own internal
+             FileProvider (authority "${applicationId}.flutter.image_provider")
+             for this same purpose via their own AAR manifest merge. This
+             app-level provider uses a distinct authority
+             ("${applicationId}.fileprovider") specifically so the two
+             cannot collide during manifest merging. If a real `flutter pub
+             get` against health ^10.2.0/image_picker's locked version shows
+             this is redundant, it's safe to delete. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+</manifest>

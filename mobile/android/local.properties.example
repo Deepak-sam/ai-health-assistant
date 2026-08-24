@@ -1,0 +1,21 @@
+# Copy this file to `local.properties` (gitignored — see ../../.gitignore's
+# `mobile/android/local.properties` entry — and machine-specific) and fill
+# in real paths. `flutter create` normally writes `local.properties`
+# automatically on first `flutter pub get`/`flutter run`; this project's
+# android/ directory was hand-authored without a Flutter SDK available, so
+# it doesn't exist yet and nothing has generated it.
+
+# Absolute path to your local Flutter SDK checkout.
+flutter.sdk=/path/to/flutter
+
+# Absolute path to your Android SDK. Android Studio usually writes this
+# automatically; command-line Gradle also honors ANDROID_HOME/ANDROID_SDK_ROOT
+# if this is omitted.
+sdk.dir=/path/to/Android/sdk
+
+# Optional. Normally written automatically by the `flutter` CLI from
+# pubspec.yaml's `version: 0.1.0+1` field (versionName+versionCode).
+# app/build.gradle falls back to versionCode=1 / versionName=1.0 if these
+# are absent, so they're safe to leave commented out for local dev builds.
+# flutter.versionCode=1
+# flutter.versionName=0.1.0

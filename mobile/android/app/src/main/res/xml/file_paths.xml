@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Paths exposed via the app-level FileProvider declared in
+     AndroidManifest.xml (authority "${applicationId}.fileprovider"), used
+     so the system camera app has somewhere to write captured JPEGs that
+     image_picker can then read back (ARCHITECTURE.md §8: the resulting
+     bytes are held in memory only afterwards, never persisted to app
+     storage long-term). -->
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path name="camera_captures" path="." />
+    <external-cache-path name="external_camera_captures" path="." />
+    <external-files-path name="external_files_captures" path="." />
+</paths>

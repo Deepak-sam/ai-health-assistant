@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Default (used by release builds, and any variant without its own
+     override): no cleartext (plain HTTP) traffic exceptions. Production
+     API_BASE_URL is expected to be https:// per README.md's --dart-define
+     table.
+
+     app/src/debug/res/xml/network_security_config.xml overrides this file
+     for debug builds only (Android's per-build-type resource merging),
+     adding a narrow localhost/emulator-loopback exception — see that file's
+     comment for why: AppConfig.apiBaseUrl's *default* value is
+     http://localhost:8080/api/v1. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

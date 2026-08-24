@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-build-only override of app/src/main/res/xml/network_security_config.xml.
+
+     AppConfig.garminRedirectScheme aside — the *unrelated* but relevant
+     fact here is AppConfig.apiBaseUrl (lib/core/config/app_config.dart)
+     defaults to `http://localhost:8080/api/v1` when no --dart-define is
+     passed, and Android blocks cleartext (plain HTTP) traffic by default
+     since API 28. Without this, `flutter run` against a local backend with
+     no --dart-define-from-file would have every Dio request fail silently
+     at the OS network layer. This exception is scoped to debug builds and
+     to loopback/emulator-host addresses only — it does not weaken release
+     builds, which use app/src/main's stricter (no exceptions) config. -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <!-- 10.0.2.2 is the Android emulator's alias for the host machine's
+             localhost. -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

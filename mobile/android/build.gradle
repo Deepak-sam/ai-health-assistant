@@ -1,0 +1,52 @@
+// Top-level Gradle build file. See settings.gradle for how the Flutter
+// Gradle plugin itself (`dev.flutter.flutter-gradle-plugin`) gets resolved
+// (via pluginManagement { includeBuild(...) }); this file wires up the
+// "normal" Android/Kotlin/Firebase plugins via the classic buildscript
+// classpath mechanism, which app/build.gradle applies with `apply plugin:`.
+//
+// Hand-authored (no Flutter SDK / Android Studio available to generate this
+// via `flutter create .`) — versions chosen for mutual compatibility as of
+// mid-2024/2025 stable releases, not verified by an actual build. See
+// mobile/README.md and this directory's file list for context.
+buildscript {
+    ext.kotlin_version = '1.9.22'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        // Android Gradle Plugin. 8.3.x requires Gradle 8.4+ (see
+        // gradle/wrapper/gradle-wrapper.properties) and supports
+        // compileSdk/targetSdk 34.
+        classpath 'com.android.tools.build:gradle:8.3.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // Reads android/app/google-services.json and generates the
+        // FirebaseOptions Firebase.initializeApp() needs natively —
+        // required because firebase_core/firebase_auth/firebase_messaging
+        // are in pubspec.yaml. google-services.json itself is NOT included
+        // here (gitignored; see mobile/README.md "Firebase setup steps") —
+        // a Gradle sync will fail with "File google-services.json is
+        // missing" until it's added.
+        classpath 'com.google.gms:google-services:4.4.1'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.buildDir
+}

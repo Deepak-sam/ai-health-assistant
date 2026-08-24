@@ -1,0 +1,89 @@
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+// Resolved via settings.gradle's pluginManagement { includeBuild(...) }.
+apply plugin: 'dev.flutter.flutter-gradle-plugin'
+// Requires android/app/google-services.json (gitignored, not included —
+// see mobile/README.md "Firebase setup steps"). Gradle sync fails without
+// it until that file is generated via `flutterfire configure` / the
+// Firebase console.
+apply plugin: 'com.google.gms.google-services'
+
+android {
+    namespace 'com.familyhealth.assistant'
+    compileSdk 34
+
+    compileOptions {
+        // flutter_local_notifications ^17.x and other plugins use Java 8+
+        // APIs (e.g. java.time) on minSdk < 26... actually minSdk here is
+        // already 26, but several plugins still declare a desugaring
+        // requirement unconditionally, so keep it enabled to be safe.
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        applicationId "com.familyhealth.assistant"
+        // Health Connect (androidx.health.connect.client) requires API 26+;
+        // this is the actual floor for this app, not Flutter's usual 21/23.
+        minSdk 26
+        targetSdk 34
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+
+    buildTypes {
+        release {
+            // TODO: replace with a real upload keystore before any release
+            // build leaves a developer's machine. Signing with the debug
+            // key for now (Flutter's own default template does the same
+            // thing until a real signingConfig is wired up) so
+            // `flutter build apk --release` / `flutter build appbundle`
+            // don't fail outright with no signing config at all.
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    // Required by coreLibraryDesugaringEnabled above.
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+
+    // Firebase BoM: pins consistent native Firebase Android SDK versions.
+    // Not strictly required for the FlutterFire plugins in pubspec.yaml
+    // (firebase_core/firebase_auth/firebase_messaging bring their own
+    // native dependencies transitively) but included as a documented,
+    // low-risk convention in case native Firebase APIs are ever called
+    // directly from Kotlin later.
+    implementation platform('com.google.firebase:firebase-bom:33.1.1')
+}
