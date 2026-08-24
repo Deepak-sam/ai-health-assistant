@@ -135,6 +135,7 @@ Structured nutrition data only — **never** a photo or photo reference (§15).
 | content | text | |
 | card_json | text | nullable, structured card payload for rendering |
 | related_query_json | text | nullable, the context bundle sent for this turn |
+| safety_flag | text | nullable, API_SPEC.md `/chat` response `safety_flag` (e.g. `seek_medical_attention`), persisted so a reopened past conversation still renders it distinctly |
 | created_at | datetime | |
 
 ## alert_rules

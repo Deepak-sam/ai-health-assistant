@@ -120,7 +120,7 @@ class _InsightTile extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(insight.text, style: theme.textTheme.bodyLarge),
+                Text(insight.insightText, style: theme.textTheme.bodyLarge),
                 const SizedBox(height: 6),
                 Text(
                   '${_categoryLabel(insight.category)} · ${DateFormat.MMMd().format(insight.surfacedAt)}',

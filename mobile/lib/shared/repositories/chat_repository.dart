@@ -93,6 +93,7 @@ class ChatRepository {
       role: 'assistant',
       content: chatResponse.reply,
       cardJson: Value(chatResponse.cards.isEmpty ? null : jsonEncode(chatResponse.cards.map(_cardToJson).toList())),
+      safetyFlag: Value(chatResponse.safetyFlag),
       createdAt: DateTime.now(),
     ));
     await _dao.touchConversation(userId: userId, conversationId: conversationId);

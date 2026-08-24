@@ -32,6 +32,7 @@ class _NutritionConfirmScreenState extends ConsumerState<NutritionConfirmScreen>
   late NutritionResult _result = widget.args.result;
   late final TextEditingController _mealNameController = TextEditingController(text: _result.mealName);
   bool _saving = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -53,14 +54,23 @@ class _NutritionConfirmScreenState extends ConsumerState<NutritionConfirmScreen>
   Future<void> _save() async {
     final userId = ref.read(currentUserIdProvider);
     if (userId == null) return;
-    setState(() => _saving = true);
-    final finalResult = _result.copyWith(mealName: _mealNameController.text.trim());
-    await ref.read(nutritionRepositoryProvider).saveConfirmedEntry(
-          userId: userId,
-          result: finalResult,
-          source: widget.args.source,
-        );
-    if (mounted) context.go('/chat');
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      final finalResult = _result.copyWith(mealName: _mealNameController.text.trim());
+      await ref.read(nutritionRepositoryProvider).saveConfirmedEntry(
+            userId: userId,
+            result: finalResult,
+            source: widget.args.source,
+          );
+      if (mounted) context.go('/chat');
+    } catch (e) {
+      if (mounted) setState(() => _error = 'Could not save that meal. Please try again.');
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -84,6 +94,10 @@ class _NutritionConfirmScreenState extends ConsumerState<NutritionConfirmScreen>
             onChanged: (updated) => _updateItem(i, updated),
             onRemove: () => _removeItem(i),
           ),
+          if (_error != null) ...[
+            const SizedBox(height: 12),
+            Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+          ],
           const SizedBox(height: 24),
           FilledButton(
             style: FilledButton.styleFrom(

@@ -146,7 +146,12 @@ class _MessageBubble extends StatelessWidget {
         trailing = null;
       }
     }
-    return ChatBubble(text: message.content, isUser: isUser, trailing: trailing);
+    return ChatBubble(
+      text: message.content,
+      isUser: isUser,
+      isSafetyFlag: message.safetyFlag != null,
+      trailing: trailing,
+    );
   }
 
   Widget _renderCard(Map<String, dynamic> card) {

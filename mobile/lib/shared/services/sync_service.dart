@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -97,6 +99,7 @@ class SyncService {
           endTime: s.endTime,
           durationMin: s.durationMin,
           sleepScore: Value(s.sleepScore),
+          stagesJson: Value(s.stages == null ? null : jsonEncode(s.stages)),
           restingHeartRate: Value(s.restingHeartRate),
           hrvMs: Value(s.hrvMs),
         ));

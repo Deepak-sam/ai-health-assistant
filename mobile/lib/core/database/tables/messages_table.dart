@@ -10,6 +10,10 @@ class Messages extends Table {
   // The context bundle sent to POST /chat for this turn, kept for
   // debugging/auditability — never sent anywhere itself.
   TextColumn get relatedQueryJson => text().named('related_query_json').nullable()();
+  // API_SPEC.md `/chat` response `safety_flag` (e.g. "seek_medical_attention"),
+  // persisted so a safety-flagged reply still renders distinctly when a past
+  // conversation is reopened from History, not just right after sending.
+  TextColumn get safetyFlag => text().named('safety_flag').nullable()();
   DateTimeColumn get createdAt => dateTime().named('created_at')();
 
   @override

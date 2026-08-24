@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/database/app_database.dart' as db;
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/alerts/alert_evaluation_service.dart';
@@ -49,6 +50,21 @@ class _FamilyHealthAppState extends ConsumerState<FamilyHealthApp> {
       final userId = ref.read(currentUserIdProvider);
       if (userId == null) return;
       Future(() async {
+        // Keep the local `users` row (DATABASE_SCHEMA.md §users) in sync
+        // with Firebase's identity on every sign-in. Nothing reads this
+        // table yet in Phase 1's UI (screens scope by Firebase uid
+        // directly), but it's the local record Settings/family-admin
+        // features (§26) will need, so it shouldn't sit permanently empty.
+        // `role` defaults to 'member' — there's no admin-designation UI in
+        // Phase 1, so every signed-in family member starts as a member.
+        await ref.read(db.appDatabaseProvider).usersDao.upsertUser(db.UsersCompanion.insert(
+              id: userId,
+              email: user.email ?? '',
+              displayName: user.displayName ?? user.email ?? 'Family member',
+              role: 'member',
+              createdAt: DateTime.now(),
+            ));
+
         await ref.read(syncServiceProvider).syncAll(userId);
         await ref.read(alertEvaluationServiceProvider).evaluateAll(userId);
       });

@@ -12,21 +12,18 @@ class ChatUiState {
     this.sending = false,
     this.error,
     this.lastSuggestedFollowups = const [],
-    this.lastSafetyFlag,
   });
 
   final String? conversationId;
   final bool sending;
   final String? error;
   final List<String> lastSuggestedFollowups;
-  final String? lastSafetyFlag;
 
   ChatUiState copyWith({
     String? conversationId,
     bool? sending,
     String? error,
     List<String>? lastSuggestedFollowups,
-    String? lastSafetyFlag,
     bool clearError = false,
   }) {
     return ChatUiState(
@@ -34,7 +31,6 @@ class ChatUiState {
       sending: sending ?? this.sending,
       error: clearError ? null : (error ?? this.error),
       lastSuggestedFollowups: lastSuggestedFollowups ?? this.lastSuggestedFollowups,
-      lastSafetyFlag: lastSafetyFlag,
     );
   }
 }
@@ -44,7 +40,9 @@ class ChatUiState {
 /// ARCHITECTURE.md §6/§9), and sending the turn. Message content itself is
 /// rendered from `chatRepository.watchMessages` (a live Drift stream), not
 /// from state here — this controller only tracks send-in-flight/error UI
-/// state and the last response's follow-ups/safety flag.
+/// state and the last response's follow-ups. The safety flag is persisted
+/// onto the assistant message itself (`messages.safety_flag`) and rendered
+/// from that stream too, so it survives reopening a past conversation.
 class ChatController extends StateNotifier<ChatUiState> {
   ChatController(this._ref, String? initialConversationId) : super(ChatUiState(conversationId: initialConversationId)) {
     if (initialConversationId == null) {
@@ -91,7 +89,6 @@ class ChatController extends StateNotifier<ChatUiState> {
       state = state.copyWith(
         sending: false,
         lastSuggestedFollowups: response.suggestedFollowups,
-        lastSafetyFlag: response.safetyFlag,
       );
     } catch (e) {
       state = state.copyWith(sending: false, error: 'Something went wrong sending that message.');
