@@ -14,7 +14,7 @@ void main() {
   final now = DateTime(2026, 1, 31, 12);
 
   group('threshold rule', () {
-    final rule = const AlertRuleSpec(
+    const rule = AlertRuleSpec(
       metricType: 'resting_heart_rate',
       condition: AlertConditionSpec(type: 'threshold', operator: '>', threshold: 90),
       window: 'daily',
@@ -48,7 +48,7 @@ void main() {
   group('baseline_relative rule', () {
     // "resting heart rate more than 10% above the 30-day average for 2
     // consecutive days" — mirrors the ARCHITECTURE.md §10 example.
-    final rule = const AlertRuleSpec(
+    const rule = AlertRuleSpec(
       metricType: 'resting_heart_rate',
       condition: AlertConditionSpec(
         type: 'baseline_relative',
@@ -89,7 +89,7 @@ void main() {
 
   group('consecutive_day rule', () {
     // "steps below 3000 for 3 consecutive days"
-    final rule = const AlertRuleSpec(
+    const rule = AlertRuleSpec(
       metricType: 'steps',
       condition: AlertConditionSpec(type: 'consecutive_day', operator: '<', threshold: 3000, consecutiveCount: 3),
       window: 'rolling',

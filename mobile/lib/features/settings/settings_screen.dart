@@ -84,17 +84,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onChanged: _setNotificationsEnabled,
           ),
           const _SectionHeader('Units'),
-          RadioListTile<String>(
-            title: const Text('Metric (kg, km)'),
-            value: 'metric',
+          RadioGroup<String>(
             groupValue: _units,
             onChanged: (v) => _setUnits(v!),
-          ),
-          RadioListTile<String>(
-            title: const Text('Imperial (lb, mi)'),
-            value: 'imperial',
-            groupValue: _units,
-            onChanged: (v) => _setUnits(v!),
+            child: const Column(
+              children: [
+                RadioListTile<String>(title: Text('Metric (kg, km)'), value: 'metric'),
+                RadioListTile<String>(title: Text('Imperial (lb, mi)'), value: 'imperial'),
+              ],
+            ),
           ),
           const _SectionHeader('Privacy'),
           const Padding(

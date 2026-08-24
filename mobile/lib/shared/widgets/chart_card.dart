@@ -163,7 +163,7 @@ class _ChartCardState extends State<ChartCard> {
           color: theme.colorScheme.primary,
           barWidth: 2.5,
           dotData: const FlDotData(show: false),
-          belowBarData: BarAreaData(show: true, color: theme.colorScheme.primary.withOpacity(0.08)),
+          belowBarData: BarAreaData(show: true, color: theme.colorScheme.primary.withValues(alpha: 0.08)),
         ),
       ],
     );

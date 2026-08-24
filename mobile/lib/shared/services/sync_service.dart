@@ -69,8 +69,6 @@ class SyncService {
       final now = DateTime.now();
       final range = domain.DateRange(start: since, end: now);
 
-      var totalSynced = 0;
-
       for (final metricType in _syncedMetricTypes) {
         final metrics = await provider.getMetrics(metricType, range);
         if (metrics.isEmpty) continue;
@@ -86,7 +84,6 @@ class SyncService {
                   createdAt: DateTime.now(),
                 ))
             .toList());
-        totalSynced += metrics.length;
       }
 
       final sleepSessions = await provider.getSleep(range);
@@ -104,7 +101,6 @@ class SyncService {
           hrvMs: Value(s.hrvMs),
         ));
       }
-      totalSynced += sleepSessions.length;
 
       final activities = await provider.getActivities(range);
       for (final a in activities) {
@@ -122,7 +118,6 @@ class SyncService {
           trainingLoad: Value(a.trainingLoad),
         ));
       }
-      totalSynced += activities.length;
 
       // Daily summaries, one upsert per day in range — cheap since
       // getDailySummary is typically backed by cached device data.

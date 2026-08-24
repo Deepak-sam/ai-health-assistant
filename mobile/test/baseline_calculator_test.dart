@@ -10,7 +10,7 @@ HealthMetric _metric(double value, DateTime timestamp) => HealthMetric(
     );
 
 void main() {
-  final calculator = const BaselineCalculator();
+  const calculator = BaselineCalculator();
   final now = DateTime(2026, 1, 31, 12);
 
   group('average', () {

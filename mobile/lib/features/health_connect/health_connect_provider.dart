@@ -111,7 +111,12 @@ class HealthConnectProvider implements HealthProvider {
       steps: steps.isEmpty ? null : steps.map((m) => m.value).reduce((a, b) => a + b).round(),
       caloriesActive: caloriesActive.isEmpty ? null : caloriesActive.fold(0.0, (a, m) => a + m.value).round(),
       caloriesTotal: caloriesTotal.isEmpty ? null : caloriesTotal.fold(0.0, (a, m) => a + m.value).round(),
-      distanceM: distance.isEmpty ? null : distance.fold(0.0, (a, m) => a + m.value),
+      // Explicit <double> type argument: without it, this fold's accumulator
+      // infers as `double?` (the ternary's other branch is `null`), and `+`
+      // on a nullable receiver is a compile error — unlike the other folds
+      // above, whose result is wrapped in `.round()` before reaching the
+      // ternary, which doesn't propagate that nullable context downward.
+      distanceM: distance.isEmpty ? null : distance.fold<double>(0.0, (a, m) => a + m.value),
       restingHeartRate: restingHr.isEmpty ? null : restingHr.last.value,
       sleepDurationMin: sleepToday?.durationMin,
       sleepScore: sleepToday?.sleepScore,

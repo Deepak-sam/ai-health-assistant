@@ -6,25 +6,42 @@ all statistics computed on-device in Dart — never by the backend, never by
 the LLM. See `../docs/ARCHITECTURE.md`, `../docs/DATABASE_SCHEMA.md`, and
 `../docs/API_SPEC.md` for the contracts this code implements.
 
-**This code was written without a Flutter SDK available in the build
-environment.** It has not been run, `flutter pub get`'d, `flutter
-analyze`'d, or compiled. It's written carefully against stable, documented
-package APIs, but treat first-build cleanup as expected, not a sign
-something is wrong — see "Known limitations & risks" below for the specific
-things most likely to need adjustment.
+**Update: since this was first written, a Flutter SDK was installed and this
+was actually verified** — `flutter pub get` (171 dependencies resolve
+cleanly), `dart run build_runner build` (Drift codegen: 176 outputs, no
+errors), `flutter analyze` (**0 issues**), and `flutter test`
+(**24/24 passing**, both pure-Dart unit test suites). Two real compile
+errors surfaced and were fixed: a missing `go_router` import in
+`scaffold_with_nav.dart`, and a Dart type-inference edge case in
+`health_connect_provider.dart` (a `.fold()` call whose accumulator type was
+inferred as nullable from a ternary's other branch — fixed with an explicit
+`<double>` type argument). All lint warnings were also cleaned up
+(deprecated `withOpacity`/`RadioListTile.groupValue` APIs migrated to their
+current replacements).
+
+**What is still NOT verified, and can't be from this environment:** an
+actual Android build (`flutter build apk`) — the Android SDK itself can't be
+installed here (its download host is network-blocked in this container,
+confirmed via `flutter doctor`) — and anything iOS (no macOS/Xcode
+available). The Dart/Flutter-framework layer is now solid; the
+native-platform layer (Health Connect, Garmin webview, camera/gallery,
+FCM, local notifications) still needs a real device or emulator to confirm.
+See "Known limitations & risks" below for specifics.
 
 ## Getting started
 
 ```bash
 cd mobile
 flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs   # generates *.g.dart for Drift
+dart run build_runner build --delete-conflicting-outputs   # generates *.g.dart for Drift
 flutter run --dart-define-from-file=env.json
 ```
 
 Drift's `@DriftDatabase`/`@DriftAccessor` classes need `build_runner` to
-generate their `part '*.g.dart'` files before anything compiles — this
-hasn't been run here (no Flutter SDK in this environment).
+generate their `part '*.g.dart'` files before anything compiles. This has
+been verified to work cleanly (176 generated files, no errors) — on a
+recent build_runner version the `--delete-conflicting-outputs` flag is a
+no-op (conflicts are handled automatically) but is harmless to pass.
 
 ### Required `--dart-define` values
 
@@ -124,23 +141,25 @@ scaffolding in this environment):
 
 ## Known limitations & risks (for the next engineer)
 
-- **Nothing here has been run.** No `flutter pub get`, `flutter analyze`, or
-  `flutter build` — there is no Flutter SDK in this build environment. Treat
-  the first real build as the first real compile check.
-- **Drift generated code doesn't exist yet.** Every `part '*.g.dart'`
-  reference needs `build_runner` before anything using the database
-  compiles. Table→row-class name mappings (e.g. `HealthMetrics` →
-  `HealthMetric`, `DailyHealthSummaries` → `DailyHealthSummary`) are written
-  assuming Drift's standard singularization rules — double-check the
-  generated names match after the first build.
-- **`health` package API surface**: see "Health Connect permission notes"
-  above — `HealthDataType` member names are the biggest single point of
-  version drift risk in this codebase.
-- **No native Android/iOS project scaffolding.** `flutter create .` (or
-  equivalent) hasn't been run against this `lib/`, so there's no
-  `android/`/`ios/` directory, no `AndroidManifest.xml`, no `Info.plist`.
-  Health Connect permissions, the Garmin redirect URL scheme, and Firebase's
-  platform config files all need to land there.
+- **`flutter pub get`, codegen, `flutter analyze`, and `flutter test` have
+  now actually been run** (see the note at the top of this file) and are
+  clean. What's *not* verified is anything requiring the Android SDK, Xcode,
+  or a device/emulator — that download/toolchain isn't reachable from the
+  environment this was built in.
+- **`health` package API surface**: `HealthDataType` member names resolved
+  correctly against `health: ^10.2.0` per `flutter analyze` — this risk is
+  lower than originally flagged, but a real device run is still the final
+  check for runtime permission-request behavior (as opposed to compile-time
+  API surface).
+- **Android native scaffolding exists** (`android/`) but has itself only
+  been hand-authored and reviewed, never built with Gradle/the Android SDK —
+  see `android/README_ICONS.md` and its manifest comments for specific
+  points flagged as lower-confidence (the Health Connect rationale
+  intent-filter shape in particular). **No iOS project scaffolding exists at
+  all** — deliberately not hand-fabricated (an incorrect `.pbxproj` is worse
+  than an honest gap); generate it with `flutter create --platforms=ios .`
+  on a machine with Xcode, then add `GoogleService-Info.plist` and the
+  `Info.plist` entries noted below.
 - **`firebase_options.dart` is not included.** Generate it with
   `flutterfire configure` and wire it into `main.dart`'s
   `Firebase.initializeApp(options: ...)` call (currently unparameterized,

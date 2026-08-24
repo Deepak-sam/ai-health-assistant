@@ -28,6 +28,7 @@ mobile/android/.gradle/
 mobile/android/local.properties
 mobile/**/*.g.dart
 mobile/**/*.freezed.dart
+mobile/**/GeneratedPluginRegistrant.*
 
 # OS/editor
 .DS_Store

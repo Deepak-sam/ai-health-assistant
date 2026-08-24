@@ -38,8 +38,8 @@ Dio buildDioClient() {
   final dio = Dio(
     BaseOptions(
       baseUrl: AppConfig.apiBaseUrl,
-      connectTimeout: Duration(milliseconds: AppConfig.apiTimeoutMs),
-      receiveTimeout: Duration(milliseconds: AppConfig.apiTimeoutMs),
+      connectTimeout: const Duration(milliseconds: AppConfig.apiTimeoutMs),
+      receiveTimeout: const Duration(milliseconds: AppConfig.apiTimeoutMs),
       contentType: 'application/json',
     ),
   );

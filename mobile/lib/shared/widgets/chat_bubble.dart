@@ -27,7 +27,7 @@ class ChatBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bubbleColor = isSafetyFlag
-        ? AppColors.danger.withOpacity(0.12)
+        ? AppColors.danger.withValues(alpha: 0.12)
         : isUser
             ? (isDark ? AppColors.darkBubbleUser : AppColors.lightBubbleUser)
             : (isDark ? AppColors.darkBubbleAssistant : AppColors.lightBubbleAssistant);
@@ -41,7 +41,7 @@ class ChatBubble extends StatelessWidget {
         border: isUser
             ? null
             : Border.all(
-                color: isSafetyFlag ? AppColors.danger.withOpacity(0.4) : Theme.of(context).dividerColor,
+                color: isSafetyFlag ? AppColors.danger.withValues(alpha: 0.4) : Theme.of(context).dividerColor,
               ),
       ),
       child: Column(
@@ -49,13 +49,13 @@ class ChatBubble extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (isSafetyFlag)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 6),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.info_outline, size: 16, color: AppColors.danger),
-                  const SizedBox(width: 6),
+                  SizedBox(width: 6),
                   Text('Please read carefully', style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.w600, fontSize: 12)),
                 ],
               ),

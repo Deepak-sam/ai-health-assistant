@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /// Bottom navigation shell. Order is fixed per the product brief: Chat,
 /// History, Insights, Settings — Chat is the default/home tab, never a

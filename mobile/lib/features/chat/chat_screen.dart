@@ -98,7 +98,7 @@ class _MessageList extends ConsumerWidget {
 
     return messagesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Could not load messages.')),
+      error: (e, _) => const Center(child: Text('Could not load messages.')),
       data: (messages) {
         if (messages.isEmpty) {
           return Center(

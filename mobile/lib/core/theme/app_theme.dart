@@ -52,7 +52,7 @@ abstract class AppTheme {
           borderSide: BorderSide.none,
         ),
       ),
-      navigationBarTheme: NavigationBarThemeData(
+      navigationBarTheme: const NavigationBarThemeData(
         backgroundColor: AppColors.lightSurface,
         indicatorColor: AppColors.lightAccentMuted,
         surfaceTintColor: Colors.transparent,
@@ -108,7 +108,7 @@ abstract class AppTheme {
           borderSide: BorderSide.none,
         ),
       ),
-      navigationBarTheme: NavigationBarThemeData(
+      navigationBarTheme: const NavigationBarThemeData(
         backgroundColor: AppColors.darkSurface,
         indicatorColor: AppColors.darkAccentMuted,
         surfaceTintColor: Colors.transparent,
