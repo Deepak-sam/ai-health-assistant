@@ -174,6 +174,44 @@ architecture so it can support official or alternative ingestion" (§7) without
 blocking the rest of the app on a third-party approval process outside this
 session's control.
 
+### 6.1 Garmin data fetch is NOT a synchronous pull — corrected after research
+
+An earlier revision of this document implied `getDailySummary`/`getSleep`/etc.
+could be backed by a simple backend proxy that calls a Garmin REST endpoint
+and returns JSON in the response. That assumption was checked against
+Garmin's actual Health API model before writing the proxy, and it's wrong in
+a way worth documenting rather than silently fixing, since it changes a
+decision made elsewhere in this doc:
+
+- Garmin's wellness data (dailies, sleeps, epochs/heart-rate, activities) is
+  delivered **asynchronously via webhook**, not returned synchronously from a
+  GET. An app requests a one-time **backfill** for a bounded historical
+  window (commonly capped around 30 days, and typically once per data type),
+  and/or receives **Push** callbacks going forward; Garmin's server calls
+  *your* registered callback URL with the payload (or, in "Ping" mode, a
+  callback URL your server then fetches).
+- Each pushed record carries the Garmin user's `userAccessToken`, which is
+  the correlation key back to a local user — meaning the backend must
+  persist that token (already true here — see `garmin/session_store.py`)
+  *and* have somewhere to land data that arrives on a schedule Garmin
+  controls, not the device's.
+- This means real Garmin data-sync needs a small server-side ingestion
+  buffer (webhook receiver → transient storage → an endpoint the device
+  polls to drain it) — a **deliberate, narrowly-scoped exception** to §2's
+  "no health-metric database" decision, not a contradiction of it: the
+  buffer would hold only Garmin's raw push payloads transiently until the
+  owning device drains them, not become a second copy of the user's health
+  history.
+
+**Decision:** this is real, non-trivial scope — a webhook endpoint, payload
+→ `userAccessToken` → local user correlation, a transient store, and a
+drain/poll endpoint for the device — and is deferred to Phase 2 rather than
+half-built now. Phase 1 ships the OAuth *connection* (§6, functional and
+tested) with `GarminProvider`'s data-fetching methods left explicitly
+unimplemented (`UnimplementedError`, not fabricated data) until this is
+designed properly. See `mobile/README.md` "Garmin OAuth notes" for the
+client-side implication.
+
 ## 7. Health Connect Integration
 
 Android-only, via the `health` Flutter plugin (community-maintained wrapper
@@ -334,5 +372,6 @@ this isn't overstated as "verified").
 
 **Phase 2 (future):** advanced correlations/recovery scoring, voice
 conversation, meal history browsing, nutrition targets, weekly reports,
-server-side alert fallback, additional wearables (HealthKit, Oura, Whoop),
-optional encrypted sync, web client.
+server-side alert fallback, **Garmin webhook + backfill data-sync (§6.1 —
+the actual wearable data pull, beyond OAuth connection)**, additional
+wearables (HealthKit, Oura, Whoop), optional encrypted sync, web client.

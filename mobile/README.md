@@ -102,14 +102,19 @@ PKCE verifier itself.
 contract assumptions above matched what got built. One gap remains:
 
 1. **There is no backend endpoint to fetch actual Garmin health data** onto
-   the device — the backend has "no health-metric database" per
-   ARCHITECTURE.md §2, and Garmin data-sync isn't in the Phase 1 backend
-   roadmap. `GarminProvider`'s data methods (`getDailySummary`, `getSleep`,
-   `getHeartRate`, `getActivities`, `getMetrics`) therefore throw
-   `UnimplementedError` rather than fabricate data. `SyncService` catches
-   this per-provider and records `device_connections.status = 'error'`
-   without breaking sync for other providers. Only the OAuth *connection
-   status* is meaningfully functional today.
+   the device. This was investigated (not just deferred) before writing this
+   README: Garmin's wellness data is **not** a simple synchronous GET a
+   backend could proxy — it's delivered async via a webhook/backfill model
+   (see ARCHITECTURE.md §6.1), which needs a small server-side ingestion
+   buffer that doesn't exist yet and is a real, separately-scoped Phase 2
+   design item, not a quick add. `GarminProvider`'s data methods
+   (`getDailySummary`, `getSleep`, `getHeartRate`, `getActivities`,
+   `getMetrics`) therefore throw `UnimplementedError` rather than fabricate
+   data or call an endpoint shape that wouldn't match how Garmin's API
+   actually works. `SyncService` catches this per-provider and records
+   `device_connections.status = 'error'` without breaking sync for other
+   providers. Only the OAuth *connection status* is meaningfully functional
+   today.
 
 Native platform config still needed (not included — no native project
 scaffolding in this environment):
